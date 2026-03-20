@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { usePokemon } from '../hooks/usePokemon';
 import { Header } from '../components/Header';
+import { CreatePokemonForm } from '../components/CreatePokemonForm';
 import { PokemonCard } from '../components/PokemonCard';
 import { NavigationButtons } from '../components/NavigationButtons';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -14,11 +15,27 @@ export const PokedexPage = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [customPokemonList, setCustomPokemonList] = useState([]);
   const { pokemon, loading, error } = usePokemon(currentPokemonId);
 
   const handlePokemonSelect = (id) => {
     setIsNavigating(true);
     setCurrentPokemonId(id);
+  };
+
+  const handleToggleCreateForm = () => {
+    setShowCreateForm(!showCreateForm);
+    if (showCreateForm) {
+      // Réinitialiser quand on ferme le formulaire
+      setIsNavigating(false);
+    }
+  };
+
+  const handleCreatePokemon = (newPokemon) => {
+    // Ajouter le nouveau Pokémon à la liste
+    setCustomPokemonList([...customPokemonList, newPokemon]);
+    setShowCreateForm(false);
   };
 
   const handlePrevious = () => {
@@ -166,17 +183,60 @@ export const PokedexPage = () => {
         onSearchChange={handleSearchChange}
         darkMode={darkMode}
         onDarkModeToggle={() => setDarkMode(!darkMode)}
+        onCreateClick={handleToggleCreateForm}
       />
 
       <main className="relative px-6 py-12">
-        <NavigationButtons
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-          canGoPrevious={currentPokemonId > 1}
-          canGoNext={currentPokemonId < 1010}
-        />
+        {showCreateForm ? (
+          <CreatePokemonForm 
+            onCreatePokemon={handleCreatePokemon}
+            onCancel={handleToggleCreateForm}
+          />
+        ) : (
+          <>
+            <NavigationButtons
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              canGoPrevious={currentPokemonId > 1}
+              canGoNext={currentPokemonId < 1010}
+            />
 
-        <PokemonCard pokemon={pokemon} />
+            <PokemonCard pokemon={pokemon} />
+
+            {customPokemonList.length > 0 && (
+              <div className="mt-12">
+                <h2 className="text-2xl font-bold text-white mb-6">Mes Pokémons créés</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {customPokemonList.map((customPokemon) => (
+                    <motion.div
+                      key={customPokemon.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="backdrop-blur-sm bg-white/10 border border-white/30 rounded-xl p-6 hover:bg-white/15 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <img 
+                          src={customPokemon.imageUrl} 
+                          alt={customPokemon.name}
+                          className="w-20 h-20 object-cover rounded-lg"
+                        />
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-white">{customPokemon.name}</h3>
+                          <p className="text-sm text-white/70 capitalize">{customPokemon.type}</p>
+                          <div className="mt-2 space-y-1 text-sm text-white/80">
+                            <p>PV: {customPokemon.hp}</p>
+                            <p>Attaque: {customPokemon.attack}</p>
+                            <p>Défense: {customPokemon.defense}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </main>
     </motion.div>
   );
