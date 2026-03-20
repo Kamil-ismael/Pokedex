@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Search, Moon, Sun } from 'lucide-react';
+import { Search, Moon, Sun, Plus } from 'lucide-react';
 
 const FEATURED_POKEMON = [
   { id: 1, name: 'Bulbasaur' },
@@ -19,6 +19,7 @@ export const Header = ({
   onSearchChange,
   darkMode,
   onDarkModeToggle,
+  onCreateClick,
 }) => {
   return (
     <motion.header
@@ -54,6 +55,16 @@ export const Header = ({
                 {pokemon.name}
               </motion.button>
             ))}
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onCreateClick}
+              className="px-4 py-2 rounded-full text-sm font-medium transition-all bg-green-600 hover:bg-green-700 text-white shadow-lg flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Créer
+            </motion.button>
           </nav>
 
           <div className="flex items-center gap-4">
